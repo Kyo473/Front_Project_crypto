@@ -61,6 +61,10 @@ const DealPage = () => {
     // Редирект на страницу создания сделки
     navigate('/create-deal');
   };
+  // Функция для редиректа на страницу с картой сделок
+  const handleViewOnMap = () => {
+    navigate('/trade-map');
+  };
   const renderContent = () => {
     if (response && response.length === 0) {
       return (
@@ -91,6 +95,7 @@ const DealPage = () => {
       <h2>Deal Page</h2>
       <button onClick={handleFetchTrades}>Получить список сделок</button>
       <button onClick={handleNearestTrades}>Получить ближайшую сделку</button>
+      <button onClick={handleViewOnMap}>Посмотреть на карте</button>
       <button onClick={handleAddDeal}>Добавить сделку</button>
       {renderContent()}
     </div>
