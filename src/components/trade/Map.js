@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import markerIcon from './pin.png';
@@ -30,11 +29,10 @@ const MapComponent = ({ setLat, setLon }) => {
       setLat(lat);
       setLon(lng);
 
-      // Update marker position
       marker.setLatLng([lat, lng]);
     });
 
-    // Clean up the map when the component unmounts
+ 
     return () => {
       map.remove();
     };

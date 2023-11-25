@@ -17,6 +17,7 @@ const Register = () => {
       is_superuser: false,
       is_verified: false,
       username,
+      address:'',
     };
 
     axios.post('http://localhost:5003/auth/register', requestBody)

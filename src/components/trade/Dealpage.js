@@ -6,10 +6,9 @@ const DealPage = () => {
   const [response, setResponse] = useState(null);
   const navigate = useNavigate();
 
-  const token = sessionStorage.getItem('authToken'); // Получаем токен из session storage
+  const token = sessionStorage.getItem('authToken'); 
   const lat = sessionStorage.getItem('lat');
   const lon = sessionStorage.getItem('lon');
-  // GET request to fetch a list of trades with authorization header
   const handleFetchTrades = async () => {
     try {
       const response = await axios.get('http://localhost:5003/trades', {
@@ -38,11 +37,10 @@ const DealPage = () => {
         }
       });
   
-      // Проверяем, что response существует и не равен null
+    
       if (response && response.data && response.data.id_trade) {
         navigate(`/deal/${response.data.id_trade}`);
       } else {
-        // Если response не содержит ожидаемых данных, обработайте этот случай
         console.error('Unexpected response format:', response);
       }
   
@@ -61,7 +59,6 @@ const DealPage = () => {
     // Редирект на страницу создания сделки
     navigate('/create-deal');
   };
-  // Функция для редиректа на страницу с картой сделок
   const handleViewOnMap = () => {
     navigate('/trade-map');
   };

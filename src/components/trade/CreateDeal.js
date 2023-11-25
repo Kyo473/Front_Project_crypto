@@ -11,19 +11,19 @@ const CreateDealPage = () => {
   const [lon, setLon] = useState(0);
   const navigate = useNavigate();
 
-  const token = sessionStorage.getItem('authToken'); // Получаем токен из session storage
-  const userID = sessionStorage.getItem('userId'); // Получаем токен из session storage
+  const token = sessionStorage.getItem('authToken'); 
+  const userID = sessionStorage.getItem('userId');
 
   const handleCreateDeal = async () => {
     try {
       const requestBody = {
+        seller_id: userID,
+        seller_address: '',
         price,
         currency,
         description,
-        created_at: new Date().toISOString(),
         lat,
         lon,
-        seller_id: userID, // Extract seller ID from the token
         hide: 'Create',
       };
   
@@ -36,7 +36,7 @@ const CreateDealPage = () => {
   
       console.log('Deal created successfully:', response.data);
   
-      // Redirect to the deal page after successful creation
+    
       navigate('/deal');
     } catch (error) {
       console.error('Failed to create deal:', error);

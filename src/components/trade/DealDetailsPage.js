@@ -5,7 +5,7 @@ import axios from 'axios';
 const DealDetailsPage = () => {
   const { dealId } = useParams();
   const [dealDetails, setDealDetails] = useState(null);
-  const token = sessionStorage.getItem('authToken'); // Получаем токен из session storage
+  const token = sessionStorage.getItem('authToken'); 
 
   useEffect(() => {
     const fetchDealDetails = async () => {
@@ -40,13 +40,13 @@ const DealDetailsPage = () => {
         <p>Loading deal details...</p>
       )}
 
-      {/* Кнопка для возврата на страницу сделок */}
+    
       <Link to="/deal">
         <button style={{ marginRight: '10px' }}>Back to Deals</button>
       </Link>
 
-      {/* Кнопка для перехода на страницу чата */}
-      <Link to="/chat">
+    
+      <Link to={`/deal/${dealId}/chat-page`}>
         <button>Chat</button>
       </Link>
     </div>

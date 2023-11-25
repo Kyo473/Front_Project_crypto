@@ -7,7 +7,6 @@ const Profile = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Получение данных пользователя при загрузке страницы
     axios.get('http://localhost:5003/users/me', {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem('authToken')}`,
@@ -38,10 +37,8 @@ const Profile = () => {
         <div>
           <p>Username: {userData.username}</p>
           <p>Email: {userData.email}</p>
-          {/* Добавьте другие поля профиля, которые у вас есть */}
         </div>
       )}
-      {/* Добавьте другие компоненты для отображения информации о заказах, статистики и т.д. */}
     </div>
   );
 };

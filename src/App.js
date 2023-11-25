@@ -8,6 +8,7 @@ import MainPage from './components/MainPage';
 import CreateDeal from './components/trade/CreateDeal';
 import DealDetailsPage from './components/trade/DealDetailsPage';
 import TradeMapPage from './components/trade/TradeMapPage';
+import ChatPage from './components/chat/ChatPage';
 const App = () => {
   return (
     <Router>
@@ -22,6 +23,7 @@ const App = () => {
         <Route path="/create-deal" element={< CreateDeal />} />
         <Route path="/deal/:dealId" element={<DealDetailsPage />} />
         <Route path="/trade-map" element={<TradeMapPage />} />
+        <Route path="/deal/:dealId/chat-page" element={<ChatPage />} />
       </Routes>
     </Router>
   );

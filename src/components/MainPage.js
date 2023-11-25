@@ -9,6 +9,9 @@ const MainPage = () => {
       <Link to="/deal">
         <button>Go to Deals</button>
       </Link>
+      <Link to="/user">
+        <button>Go to Profile</button>
+      </Link>
     </div>
   );
 };
