@@ -58,7 +58,11 @@ const CreateDealPage = () => {
           <br />
           <label>
             Currency:
-            <input type="text" value={currency} onChange={(e) => setCurrency(e.target.value)} />
+              <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
+                <option value="BTC">BTC</option>
+                <option value="MATIC">MATIC</option>
+                <option value="USDT">USDT</option>
+              </select>
           </label>
           <br />
           <label>
