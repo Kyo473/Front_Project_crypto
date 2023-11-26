@@ -7,7 +7,7 @@ const Profile = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.get('http://localhost:5003/users/me', {
+    axios.get('http://'+ window.location.hostname + ':5003/users/me', {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem('authToken')}`,
       },
