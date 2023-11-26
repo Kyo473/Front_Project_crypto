@@ -20,7 +20,7 @@ const Register = () => {
       address:'',
     };
 
-    axios.post('http://localhost:5003/auth/register', requestBody)
+    axios.post('http://'+ window.location.hostname + ':5003/auth/register', requestBody)
       .then(response => {
         console.log('Registration successful:', response.data);
         navigate('/login');

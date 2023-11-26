@@ -11,7 +11,7 @@ const DealPage = () => {
   const lon = sessionStorage.getItem('lon');
   const handleFetchTrades = async () => {
     try {
-      const response = await axios.get('http://localhost:5003/trades', {
+      const response = await axios.get('http://'+ window.location.hostname + ':5003/trades', {
         params: {
           skip: 0,
           limit: 100
@@ -27,7 +27,7 @@ const DealPage = () => {
   };
   const handleNearestTrades = async () => {
     try {
-      const response = await axios.get('http://localhost:5003/nearest', {
+      const response = await axios.get('http://'+ window.location.hostname + ':5003/nearest', {
         params: {
           lat: lat,
           lon: lon

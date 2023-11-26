@@ -27,7 +27,7 @@ const CreateDealPage = () => {
         hide: 'Create',
       };
   
-      const response = await axios.post('http://localhost:5003/trade', requestBody, {
+      const response = await axios.post('http://'+ window.location.hostname + ':5003/trade', requestBody, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',

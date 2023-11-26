@@ -10,7 +10,7 @@ const DealDetailsPage = () => {
   useEffect(() => {
     const fetchDealDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:5003/trades/${dealId}`, {
+        const response = await axios.get('http://'+ window.location.hostname + `:5003/trades/${dealId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

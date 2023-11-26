@@ -10,7 +10,7 @@ const TradeMapPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5003/visualize', {
+        const response = await axios.get('http://'+ window.location.hostname + ':5003/visualize', {
           headers: {
             Authorization: `Bearer ${token}`
           }

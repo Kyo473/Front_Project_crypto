@@ -26,7 +26,7 @@ const Login = () => {
       requestBody.append('client_secret', '');
 
       try {
-        const response = await axios.post('http://localhost:5003/auth/jwt/login', requestBody, {
+        const response = await axios.post('http://'+ window.location.hostname + ':5003/auth/jwt/login', requestBody, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
