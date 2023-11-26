@@ -10,7 +10,7 @@ const ChatPage = () => {
   const [ws, setWs] = useState(null);
   const [messages, setMessages] = useState([]);
 
-  const hostportDns = 'localhost:5003'; 
+  const hostportDns = window.location.hostname + ':5003'; 
 
   const appendMessage = (msg) => {
     setMessages((prevMessages) => [...prevMessages, msg]);
