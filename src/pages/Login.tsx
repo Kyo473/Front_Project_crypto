@@ -1,22 +1,21 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { observer } from 'mobx-react-lite';
+import { authStore } from '../stores/AuthStore';
 
-const Login: React.FC = () => {
+const Login: React.FC = observer(() => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null);
+        authStore.clearError();
 
         try {
-            // Здесь будет логика авторизации
-            console.log('Login attempt:', { email, password });
+            await authStore.login(email, password);
             navigate('/profile');
         } catch (err) {
-            setError('Ошибка при входе. Проверьте правильность данных.');
             console.error('Login error:', err);
         }
     };
@@ -27,9 +26,9 @@ const Login: React.FC = () => {
                 <div className="max-w-md mx-auto">
                     <h1 className="text-3xl font-bold mb-8 text-center">Вход в систему</h1>
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {error && (
+                        {authStore.error && (
                             <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg">
-                                {error}
+                                {authStore.error}
                             </div>
                         )}
                         <div>
@@ -60,9 +59,10 @@ const Login: React.FC = () => {
                         </div>
                         <button
                             type="submit"
-                            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            disabled={authStore.isLoading}
+                            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Войти
+                            {authStore.isLoading ? 'Загрузка...' : 'Войти'}
                         </button>
                     </form>
                     <div className="mt-6 text-center">
@@ -80,6 +80,6 @@ const Login: React.FC = () => {
             </main>
         </div>
     );
-};
+});
 
 export default Login; 

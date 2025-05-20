@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-
+import { observer } from 'mobx-react-lite';
+import { authStore } from '../stores/AuthStore';
 
 interface RegisterData {
     email: string;
@@ -13,7 +13,7 @@ interface RegisterData {
     is_verified: boolean;
 }
 
-const Register: React.FC = () => {
+const Register: React.FC = observer(() => {
     const [formData, setFormData] = useState<RegisterData>({
         email: '',
         password: '',
@@ -24,9 +24,7 @@ const Register: React.FC = () => {
         is_verified: false
     });
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
-    const { login } = useAuth();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -38,26 +36,17 @@ const Register: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null);
+        authStore.clearError();
 
         if (formData.password !== confirmPassword) {
-            setError('Пароли не совпадают');
+            authStore.error = 'Пароли не совпадают';
             return;
         }
 
         try {
-            // Здесь будет логика регистрации
-            console.log('Register attempt:', formData);
-            
-            // После успешной регистрации автоматически логиним пользователя
-            login({
-                ...formData,
-                token: 'dummy-token' // В реальном приложении токен будет получен от сервера
-            });
-            
+            await authStore.register(formData);
             navigate('/profile');
         } catch (err) {
-            setError('Ошибка при регистрации. Попробуйте позже.');
             console.error('Register error:', err);
         }
     };
@@ -68,9 +57,9 @@ const Register: React.FC = () => {
                 <div className="max-w-md mx-auto">
                     <h1 className="text-3xl font-bold mb-8 text-center">Регистрация</h1>
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {error && (
+                        {authStore.error && (
                             <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg">
-                                {error}
+                                {authStore.error}
                             </div>
                         )}
                         <div>
@@ -149,9 +138,10 @@ const Register: React.FC = () => {
                         </div>
                         <button
                             type="submit"
-                            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            disabled={authStore.isLoading}
+                            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Зарегистрироваться
+                            {authStore.isLoading ? 'Загрузка...' : 'Зарегистрироваться'}
                         </button>
                     </form>
                     <div className="mt-6 text-center">
@@ -169,6 +159,6 @@ const Register: React.FC = () => {
             </main>
         </div>
     );
-};
+});
 
 export default Register; 
