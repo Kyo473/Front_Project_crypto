@@ -14,6 +14,14 @@ interface User {
   is_active: boolean;
   is_superuser: boolean;
   is_verified: boolean;
+  registered_at: string;
+}
+
+interface RegisterData {
+  email: string;
+  username: string;
+  password: string;
+  address: string;
 }
 
 class AuthStore {
@@ -25,6 +33,7 @@ class AuthStore {
 
   constructor() {
     makeAutoObservable(this);
+    // Initialize persistence
     makePersistable(this, {
       name: 'AuthStore',
       properties: ['user', 'accessToken', 'isAuthenticated'],
@@ -90,7 +99,7 @@ class AuthStore {
     }
   }
 
-  async register(userData: Omit<User, 'id'> & { password: string }) {
+  async register(userData: RegisterData) {
     try {
       this.isLoading = true;
       this.error = null;
@@ -121,13 +130,24 @@ class AuthStore {
     }
   }
 
-  logout() {
+  logout = () => {
+    // Reset all store values
     runInAction(() => {
       this.user = null;
       this.accessToken = null;
       this.isAuthenticated = false;
+      this.isLoading = false;
       this.error = null;
     });
+
+    // Clear localStorage
+    localStorage.removeItem('AuthStore');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
+
+    // Clear sessionStorage
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('user');
   }
 
   clearError() {
@@ -135,4 +155,5 @@ class AuthStore {
   }
 }
 
+// Create a single instance of AuthStore
 export const authStore = new AuthStore(); 

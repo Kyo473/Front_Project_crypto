@@ -4,9 +4,9 @@ import Features from '../components/home/Features';
 import CryptoTable from '../components/crypto/CryptoTable';
 import FAQ from '../components/home/FAQ';
 
-const GuestLanding = () => {
+const GuestLanding: React.FC = () => {
     return (
-        <div>
+        <div className="min-h-screen bg-slate-900 text-white">
             <Hero />
             <Features />
             <CryptoTable />
