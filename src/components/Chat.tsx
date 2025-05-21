@@ -7,11 +7,16 @@ interface ChatProps {
 }
 
 interface Message {
-    id?: string;
+    id: string;
     message: string;
     sender_id: string;
     chat_id: string;
     send_at: string;
+}
+
+interface Deal {
+    id: string;
+    participants: string[];
 }
 
 export const Chat: React.FC<ChatProps> = observer(({ chatId }) => {
@@ -19,54 +24,96 @@ export const Chat: React.FC<ChatProps> = observer(({ chatId }) => {
     const [newMessage, setNewMessage] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isConnected, setIsConnected] = useState(false);
+    const [hasAccess, setHasAccess] = useState(false);
     const wsRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
         if (!authStore.user || !authStore.accessToken) return;
 
-        const hostportDns = import.meta.env.VITE_BACKEND_URL.replace(/^https?:\/\//, '');
-        const ws = new WebSocket(`ws://${hostportDns}/ws/${chatId}/${authStore.user.id}`);
-        wsRef.current = ws;
-
-        ws.onopen = async () => {
-            setIsConnected(true);
-            ws.send(JSON.stringify({ authorization: `Bearer ${authStore.accessToken}` }));
-            await getLastMessages();
-        };
-
-        ws.onmessage = (event) => {
+        const checkAccess = async () => {
             try {
-                const match = event.data.match(/Client #([a-f0-9-]+) in Room/);
-                const newMessage: Message = {
-                    id: Date.now().toString(),
-                    message: event.data,
-                    sender_id: match ? match[1] : 'unknown',
-                    chat_id: chatId,
-                    send_at: new Date().toISOString()
-                };
-                setMessages(prev => [...prev, newMessage].sort((a, b) => 
-                    new Date(a.send_at).getTime() - new Date(b.send_at).getTime()
-                ));
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/chatroom/${chatId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authStore.accessToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    setHasAccess(false);
+                    setIsLoading(false);
+                    return;
+                }
+                
+                const chatData = await response.json();
+                if (!authStore.user) {
+                    setHasAccess(false);
+                    setIsLoading(false);
+                    return;
+                }
+                const isParticipant = chatData.seller_id === authStore.user.id || chatData.buyer_id === authStore.user.id;
+                
+                if (!isParticipant) {
+                    setHasAccess(false);
+                    setIsLoading(false);
+                    return;
+                }
+
+                setHasAccess(true);
+                setIsLoading(false);
+                await getLastMessages();
             } catch (error) {
-                console.error('Error handling message:', error);
+                console.error('Error checking access:', error);
+                setHasAccess(false);
+                setIsLoading(false);
             }
         };
 
-        ws.onerror = (error) => {
-            console.error('WebSocket error:', error);
-            setIsConnected(false);
-        };
+        checkAccess();
 
-        ws.onclose = () => {
-            setIsConnected(false);
-        };
+        if (hasAccess && authStore.user) {
+            const hostportDns = import.meta.env.VITE_BACKEND_URL.replace(/^https?:\/\//, '');
+            const ws = new WebSocket(`ws://${hostportDns}/ws/${chatId}/${authStore.user.id}`);
+            wsRef.current = ws;
+
+            ws.onopen = () => {
+                setIsConnected(true);
+                ws.send(JSON.stringify({ authorization: `Bearer ${authStore.accessToken}` }));
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const match = event.data.match(/Client #([a-f0-9-]+) in Room/);
+                    const newMessage: Message = {
+                        id: Date.now().toString(),
+                        message: event.data,
+                        sender_id: match ? match[1] : 'unknown',
+                        chat_id: chatId,
+                        send_at: new Date().toISOString()
+                    };
+                    setMessages(prev => [...prev, newMessage].sort((a, b) => 
+                        new Date(a.send_at).getTime() - new Date(b.send_at).getTime()
+                    ));
+                } catch (error) {
+                    console.error('Error handling message:', error);
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                setIsConnected(false);
+            };
+
+            ws.onclose = () => {
+                setIsConnected(false);
+            };
+        }
 
         return () => {
             if (wsRef.current) {
                 wsRef.current.close();
             }
         };
-    }, [chatId]);
+    }, [chatId, hasAccess]);
 
     const getLastMessages = async () => {
         try {
@@ -120,6 +167,17 @@ export const Chat: React.FC<ChatProps> = observer(({ chatId }) => {
         return (
             <div className="flex justify-center items-center h-64">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
+
+    if (!hasAccess) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="text-center text-gray-500">
+                    <p className="text-lg font-semibold mb-2">Доступ запрещен</p>
+                    <p>Вы не являетесь участником этой сделки</p>
+                </div>
             </div>
         );
     }
