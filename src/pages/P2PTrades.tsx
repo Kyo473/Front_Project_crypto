@@ -249,7 +249,9 @@ const P2PTrades: React.FC = observer(() => {
                                             instanceRef={setMapRef}
                                         >
                                             <SearchControl options={{ float: 'right' }} />
-                                            {tradeStore.getTrades().map((trade) => (
+                                            {tradeStore.getTrades()
+                                                .filter(trade => trade.hide === 'Create')
+                                                .map((trade) => (
                                                 <Placemark
                                                     key={trade.id}
                                                     geometry={[trade.lat, trade.lon]}
@@ -339,7 +341,9 @@ const P2PTrades: React.FC = observer(() => {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-700/50">
-                                            {tradeStore.getTrades().map((trade) => (
+                                            {tradeStore.getTrades()
+                                                .filter(trade => trade.hide === 'Create')
+                                                .map((trade) => (
                                                 <tr key={trade.id} className="hover:bg-slate-700/30 transition-colors">
                                                     <td className="px-6 py-4">
                                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${

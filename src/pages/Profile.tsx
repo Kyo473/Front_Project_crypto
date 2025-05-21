@@ -1,11 +1,57 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
 import { authStore } from '../stores/AuthStore';
 
+interface Trade {
+    id: string;
+    buyer_id: string;
+    seller_id: string;
+    buyer_address: string;
+    seller_address: string;
+    price: number;
+    amount: number;
+    currency: string;
+    created_at: string;
+    description: string;
+    lat: number;
+    lon: number;
+    hide: string;
+}
+
 const Profile: React.FC = observer(() => {
     const navigate = useNavigate();
     const { user, logout } = authStore;
+    const [trades, setTrades] = useState<Trade[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchTrades = async () => {
+            if (!user) return;
+            try {
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/trades?skip=0&limit=100`, {
+                    headers: {
+                        'Authorization': `Bearer ${authStore.accessToken}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch trades');
+                
+                const data = await response.json();
+                // Фильтруем сделки, где пользователь является либо покупателем, либо продавцом
+                const userTrades = data.filter((trade: Trade) => 
+                    trade.buyer_id === user.id || trade.seller_id === user.id
+                );
+                setTrades(userTrades);
+            } catch (error) {
+                console.error('Error fetching trades:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchTrades();
+    }, [user]);
 
     const handleLogout = () => {
         logout();
@@ -106,6 +152,72 @@ const Profile: React.FC = observer(() => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    
+                    <div className="mt-8">
+                        <h2 className="text-2xl font-bold mb-6">Мои сделки</h2>
+                        {isLoading ? (
+                            <div className="flex justify-center items-center h-32">
+                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                            </div>
+                        ) : trades.length === 0 ? (
+                            <p className="text-gray-400 text-center py-4">У вас пока нет сделок</p>
+                        ) : (
+                            <div className="bg-slate-800 rounded-lg overflow-hidden">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="bg-slate-700/50">
+                                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Тип</th>
+                                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Криптовалюта</th>
+                                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Сумма</th>
+                                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Цена</th>
+                                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Статус</th>
+                                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Дата</th>
+                                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Действия</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-700/50">
+                                            {trades.map((trade) => (
+                                                <tr key={trade.id} className="hover:bg-slate-700/30 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                            trade.buyer_id === user?.id ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                                                        }`}>
+                                                            {trade.buyer_id === user?.id ? 'Покупка' : 'Продажа'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-gray-300">{trade.currency}</td>
+                                                    <td className="px-6 py-4 text-gray-300">{trade.amount}</td>
+                                                    <td className="px-6 py-4 text-gray-300">{trade.price.toLocaleString()} ₽</td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                            trade.hide === 'Create' ? 'bg-blue-500/20 text-blue-400' :
+                                                            trade.hide === 'Pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                                                            trade.hide === 'Successful' ? 'bg-green-500/20 text-green-400' :
+                                                            'bg-red-500/20 text-red-400'
+                                                        }`}>
+                                                            {trade.hide}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-gray-300">
+                                                        {new Date(trade.created_at).toLocaleDateString('ru-RU')}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <button 
+                                                            onClick={() => navigate(`/p2p-trades/${trade.id}`)}
+                                                            className="text-blue-400 hover:text-blue-300 transition-colors"
+                                                        >
+                                                            Подробнее
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>
