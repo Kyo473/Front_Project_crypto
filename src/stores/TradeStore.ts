@@ -3,17 +3,27 @@ import { authStore } from './AuthStore';
 
 export interface Trade {
     id: string;
-    type: 'buy' | 'sell';
-    cryptocurrency: string;
-    amount: number;
+    buyer_address: string;
+    seller_address: string;
     price: number;
-    paymentMethod: string;
-    user: string;
-    status: 'active' | 'completed' | 'cancelled';
-    location?: {
-        coordinates: [number, number];
-        address: string;
-    };
+    amount: number;
+    currency: string;
+    created_at: string;
+    description: string;
+    lat: number;
+    lon: number;
+    hide: string;
+}
+
+export interface CreateTradeData {
+    seller_id: string;
+    seller_address: string;
+    price: number;
+    currency: string;
+    description: string;
+    lat: number;
+    lon: number;
+    hide: string;
 }
 
 class TradeStore {
@@ -28,30 +38,29 @@ class TradeStore {
     private transformTradeData(tradeData: any): Trade {
         return {
             id: tradeData.id,
-            type: tradeData.buyer_address ? 'buy' : 'sell',
-            cryptocurrency: tradeData.currency,
-            amount: 0,
+            buyer_address: tradeData.buyer_address || '',
+            seller_address: tradeData.seller_address,
             price: tradeData.price,
-            paymentMethod: 'Bank Transfer',
-            user: tradeData.seller_address,
-            status: this.mapHideStatusToTradeStatus(tradeData.hide),
-            location: {
-                coordinates: [tradeData.lat, tradeData.lon],
-                address: tradeData.description || 'Адрес не указан'
-            }
+            amount: tradeData.amount,
+            currency: tradeData.currency,
+            created_at: tradeData.created_at,
+            description: tradeData.description,
+            lat: tradeData.lat,
+            lon: tradeData.lon,
+            hide: tradeData.hide
         };
     }
 
-    private mapHideStatusToTradeStatus(hideStatus: string): 'active' | 'completed' | 'cancelled' {
-        switch (hideStatus) {
+    public mapHideStatusToTradeStatus(hide: string): string {
+        switch (hide) {
             case 'Create':
-                return 'active';
+                return 'Активна';
+            case 'Pending':
+                return 'В процессе';
             case 'Successful':
-                return 'completed';
-            case 'Error':
-                return 'cancelled';
+                return 'Завершена';
             default:
-                return 'active';
+                return 'Отменена';
         }
     }
 
@@ -88,6 +97,99 @@ class TradeStore {
         } catch (error) {
             console.error('Error fetching trades:', error);
             this.error = 'Ошибка при загрузке сделок';
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    async createTrade(tradeData: CreateTradeData) {
+        try {
+            this.loading = true;
+            this.error = null;
+
+            if (!authStore.isAuthenticated || !authStore.accessToken) {
+                this.error = 'Требуется авторизация';
+                return;
+            }
+
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/trade`, {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authStore.accessToken}`
+                },
+                body: JSON.stringify(tradeData)
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    this.error = 'Требуется авторизация';
+                    authStore.logout();
+                } else {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return;
+            }
+
+            const newTrade = await response.json();
+            this.trades.push(this.transformTradeData(newTrade));
+            return newTrade;
+        } catch (error) {
+            console.error('Error creating trade:', error);
+            this.error = 'Ошибка при создании сделки';
+            throw error;
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    async acceptTrade(tradeId: string) {
+        try {
+            this.loading = true;
+            this.error = null;
+
+            if (!authStore.isAuthenticated || !authStore.accessToken || !authStore.user) {
+                this.error = 'Требуется авторизация';
+                return;
+            }
+
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/trades/${tradeId}/accept`, {
+                method: 'PATCH',
+                headers: {
+                    'accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authStore.accessToken}`
+                },
+                body: JSON.stringify({
+                    buyer_id: authStore.user.id,
+                    buyer_address: authStore.user.address,
+                    hide: 'Pending'
+                })
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    this.error = 'Требуется авторизация';
+                    authStore.logout();
+                } else {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return;
+            }
+
+            // Обновляем статус сделки в локальном списке
+            const updatedTrade = await response.json();
+            const index = this.trades.findIndex(t => t.id === tradeId);
+            if (index !== -1) {
+                this.trades[index] = this.transformTradeData(updatedTrade);
+            }
+
+            return updatedTrade;
+        } catch (error) {
+            console.error('Error accepting trade:', error);
+            this.error = 'Ошибка при принятии сделки';
+            throw error;
         } finally {
             this.loading = false;
         }

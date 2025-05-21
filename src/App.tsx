@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -10,24 +10,30 @@ import Market from './pages/Market';
 import About from './pages/About';
 import CryptoDetails from './pages/CryptoDetails';
 import P2PTrades from './pages/P2PTrades';
+import TradeDetails from './pages/TradeDetails';
+import { AuthProvider } from './contexts/AuthContext';
 
 const App: React.FC = observer(() => {
     return (
-        <BrowserRouter>
-            <div className="min-h-screen bg-slate-900">
-                <Navigation />
-                <Routes>
-                    <Route path="/" element={<GuestLanding />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/market" element={<Market />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/crypto/:id" element={<CryptoDetails />} />
-                    <Route path="/p2p" element={<P2PTrades />} />
-                </Routes>
-            </div>
-        </BrowserRouter>
+        <Router>
+            <AuthProvider>
+                <div className="min-h-screen bg-slate-900">
+                    <Navigation />
+                    <Routes>
+                        <Route path="/" element={<GuestLanding />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/market" element={<Market />} />
+                        <Route path="/about" element={<About />} />
+                        <Route path="/crypto/:id" element={<CryptoDetails />} />
+                        <Route path="/p2p" element={<P2PTrades />} />
+                        <Route path="/p2p-trades" element={<P2PTrades />} />
+                        <Route path="/p2p-trades/:id" element={<TradeDetails />} />
+                    </Routes>
+                </div>
+            </AuthProvider>
+        </Router>
     );
 });
 
