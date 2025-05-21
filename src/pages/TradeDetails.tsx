@@ -20,11 +20,32 @@ const TradeDetails: React.FC = observer(() => {
     useEffect(() => {
         const loadTrade = async () => {
             if (!id) return;
-            const trade = tradeStore.getTrades().find(t => t.id === id);
-            if (trade) {
-                setTrade(trade);
+            try {
+                setIsLoading(true);
+                // Сначала проверяем локальное хранилище
+                const trade = tradeStore.getTrades().find(t => t.id === id);
+                if (trade) {
+                    setTrade(trade);
+                } else {
+                    // Если сделка не найдена локально, загружаем с сервера
+                    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/trades/${id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${authStore.accessToken}`
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Trade not found');
+                    }
+                    
+                    const tradeData = await response.json();
+                    setTrade(tradeData);
+                }
+            } catch (error) {
+                console.error('Error loading trade:', error);
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
 
         const checkChat = async () => {
