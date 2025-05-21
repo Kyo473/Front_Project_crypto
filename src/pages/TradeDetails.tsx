@@ -10,11 +10,24 @@ const TradeDetails: React.FC = observer(() => {
     const navigate = useNavigate();
     const [trade, setTrade] = useState(tradeStore.getTrades().find(t => t.id === id));
     const [isAccepting, setIsAccepting] = useState(false);
+    const [showChatNotification, setShowChatNotification] = useState(false);
+    const [chatRoom, setChatRoom] = useState<any>(null);
+    const [isLoadingChat, setIsLoadingChat] = useState(true);
 
     useEffect(() => {
         if (!trade) {
             navigate('/p2p-trades');
+            return;
         }
+
+        const checkChat = async () => {
+            setIsLoadingChat(true);
+            const chat = await tradeStore.getChatRoom(trade.id);
+            setChatRoom(chat);
+            setIsLoadingChat(false);
+        };
+
+        checkChat();
     }, [trade, navigate]);
 
     if (!trade) {
@@ -27,6 +40,10 @@ const TradeDetails: React.FC = observer(() => {
             await tradeStore.acceptTrade(trade.id);
             // Обновляем локальное состояние сделки
             setTrade(tradeStore.getTrades().find(t => t.id === trade.id));
+            // Показываем уведомление о создании чата
+            setShowChatNotification(true);
+            // Скрываем уведомление через 5 секунд
+            setTimeout(() => setShowChatNotification(false), 5000);
             // Перенаправляем на страницу сделок
             navigate('/p2p-trades');
         } catch (error) {
@@ -55,6 +72,12 @@ const TradeDetails: React.FC = observer(() => {
                     {tradeStore.getError() && (
                         <div className="mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400">
                             {tradeStore.getError()}
+                        </div>
+                    )}
+
+                    {showChatNotification && (
+                        <div className="mb-4 p-4 bg-green-500/20 border border-green-500/50 rounded-lg text-green-400">
+                            Чат успешно создан! Вы можете найти его в разделе сообщений.
                         </div>
                     )}
 
@@ -99,7 +122,7 @@ const TradeDetails: React.FC = observer(() => {
                                     <p className="text-lg">{trade.seller_address}</p>
                                 </div>
 
-                                {trade.hide === 'Create' && (
+                                {trade.hide === 'Create' && authStore.user && authStore.user.id !== trade.seller_id && (
                                     <button
                                         onClick={handleAcceptTrade}
                                         disabled={isAccepting || !authStore.isAuthenticated}
@@ -118,6 +141,20 @@ const TradeDetails: React.FC = observer(() => {
                                             trade.buyer_address ? 'Купить' : 'Продать'
                                         )}
                                     </button>
+                                )}
+
+                                {isLoadingChat ? (
+                                    <div className="flex justify-center items-center h-32">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                                    </div>
+                                ) : chatRoom && chatRoom.buyer_id && (
+                                    <div className="mt-6">
+                                        <h3 className="text-lg font-semibold mb-4">Чат сделки</h3>
+                                        <div className="bg-slate-700/50 rounded-lg p-4 h-96 overflow-y-auto">
+                                            {/* Здесь будет компонент чата */}
+                                            <p className="text-gray-400 text-center">Чат успешно создан</p>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         </div>
