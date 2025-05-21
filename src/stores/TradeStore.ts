@@ -1,25 +1,109 @@
-import { create } from 'zustand';
-import type { Trade } from '../types';
+import { makeAutoObservable } from 'mobx';
+import { authStore } from './AuthStore';
 
-interface TradeStore {
-  trades: Trade[];
-  addTrade: (trade: Trade) => void;
-  clearTrades: () => void;
+export interface Trade {
+    id: string;
+    type: 'buy' | 'sell';
+    cryptocurrency: string;
+    amount: number;
+    price: number;
+    paymentMethod: string;
+    user: string;
+    status: 'active' | 'completed' | 'cancelled';
+    location?: {
+        coordinates: [number, number];
+        address: string;
+    };
 }
 
-type TradeStoreState = {
-  trades: Trade[];
-};
+class TradeStore {
+    trades: Trade[] = [];
+    loading: boolean = false;
+    error: string | null = null;
 
-type TradeStoreActions = {
-  addTrade: (trade: Trade) => void;
-  clearTrades: () => void;
-};
+    constructor() {
+        makeAutoObservable(this);
+    }
 
-export const useTradeStore = create<TradeStore>((set) => ({
-  trades: [],
-  addTrade: (trade: Trade) => set((state: TradeStoreState) => ({ 
-    trades: [...state.trades, trade] 
-  })),
-  clearTrades: () => set({ trades: [] }),
-}));
+    private transformTradeData(tradeData: any): Trade {
+        return {
+            id: tradeData.id,
+            type: tradeData.buyer_address ? 'buy' : 'sell',
+            cryptocurrency: tradeData.currency,
+            amount: 0,
+            price: tradeData.price,
+            paymentMethod: 'Bank Transfer',
+            user: tradeData.seller_address,
+            status: this.mapHideStatusToTradeStatus(tradeData.hide),
+            location: {
+                coordinates: [tradeData.lat, tradeData.lon],
+                address: tradeData.description || 'Адрес не указан'
+            }
+        };
+    }
+
+    private mapHideStatusToTradeStatus(hideStatus: string): 'active' | 'completed' | 'cancelled' {
+        switch (hideStatus) {
+            case 'Create':
+                return 'active';
+            case 'Successful':
+                return 'completed';
+            case 'Error':
+                return 'cancelled';
+            default:
+                return 'active';
+        }
+    }
+
+    async fetchTrades(skip: number = 0, limit: number = 100) {
+        try {
+            this.loading = true;
+            this.error = null;
+
+            if (!authStore.isAuthenticated || !authStore.accessToken) {
+                this.error = 'Требуется авторизация';
+                return;
+            }
+
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/trades?skip=${skip}&limit=${limit}`, {
+                method: 'GET',
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${authStore.accessToken}`
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    this.error = 'Требуется авторизация';
+                    authStore.logout();
+                } else {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return;
+            }
+
+            const data = await response.json();
+            this.trades = data.map((trade: any) => this.transformTradeData(trade));
+        } catch (error) {
+            console.error('Error fetching trades:', error);
+            this.error = 'Ошибка при загрузке сделок';
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    getTrades() {
+        return this.trades;
+    }
+
+    isLoading() {
+        return this.loading;
+    }
+
+    getError() {
+        return this.error;
+    }
+}
+
+export const tradeStore = new TradeStore();
