@@ -54,6 +54,12 @@ const Navigation: React.FC = observer(() => {
                             >
                                 О нас
                             </Link>
+                            <Link
+                                to="/api-docs"
+                                className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                            >
+                                API Документация
+                            </Link>
                         </div>
                     )}
                     

@@ -11,6 +11,7 @@ import About from './pages/About';
 import CryptoDetails from './pages/CryptoDetails';
 import P2PTrades from './pages/P2PTrades';
 import TradeDetails from './pages/TradeDetails';
+import ApiDocs from './pages/ApiDocs';
 import { AuthProvider } from './contexts/AuthContext';
 
 const App: React.FC = observer(() => {
@@ -30,6 +31,7 @@ const App: React.FC = observer(() => {
                         <Route path="/p2p" element={<P2PTrades />} />
                         <Route path="/p2p-trades" element={<P2PTrades />} />
                         <Route path="/p2p-trades/:id" element={<TradeDetails />} />
+                        <Route path="/api-docs" element={<ApiDocs />} />
                     </Routes>
                 </div>
             </AuthProvider>
