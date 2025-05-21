@@ -17,7 +17,7 @@ const Navigation: React.FC = observer(() => {
             }
         } else {
             // If user is not authenticated and tries to access protected pages, redirect to home
-            if (location.pathname === '/profile') {
+            if (location.pathname === '/profile' || location.pathname === '/p2p') {
                 navigate('/');
             }
         }
@@ -60,6 +60,18 @@ const Navigation: React.FC = observer(() => {
                     <div className="flex items-center space-x-4">
                         {isAuthenticated ? (
                             <>
+                                <Link
+                                    to="/market"
+                                    className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                                >
+                                    Маркет
+                                </Link>
+                                <Link
+                                    to="/p2p"
+                                    className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                                >
+                                    P2P сделки
+                                </Link>
                                 <Link
                                     to="/profile"
                                     className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"

@@ -9,6 +9,7 @@ import GuestLanding from './pages/GuestLanding';
 import Market from './pages/Market';
 import About from './pages/About';
 import CryptoDetails from './pages/CryptoDetails';
+import P2PTrades from './pages/P2PTrades';
 
 const App: React.FC = observer(() => {
     return (
@@ -23,6 +24,7 @@ const App: React.FC = observer(() => {
                     <Route path="/market" element={<Market />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/crypto/:id" element={<CryptoDetails />} />
+                    <Route path="/p2p" element={<P2PTrades />} />
                 </Routes>
             </div>
         </BrowserRouter>
