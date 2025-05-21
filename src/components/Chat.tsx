@@ -36,12 +36,19 @@ export const Chat: React.FC<ChatProps> = observer(({ chatId }) => {
 
         ws.onmessage = (event) => {
             try {
-                const message = JSON.parse(event.data);
-                setMessages(prev => [...prev, message].sort((a, b) => 
-                    new Date(b.send_at).getTime() - new Date(a.send_at).getTime()
+                const match = event.data.match(/Client #([a-f0-9-]+) in Room/);
+                const newMessage: Message = {
+                    id: Date.now().toString(),
+                    message: event.data,
+                    sender_id: match ? match[1] : 'unknown',
+                    chat_id: chatId,
+                    send_at: new Date().toISOString()
+                };
+                setMessages(prev => [...prev, newMessage].sort((a, b) => 
+                    new Date(a.send_at).getTime() - new Date(b.send_at).getTime()
                 ));
             } catch (error) {
-                console.error('Error parsing message:', error);
+                console.error('Error handling message:', error);
             }
         };
 
@@ -73,7 +80,7 @@ export const Chat: React.FC<ChatProps> = observer(({ chatId }) => {
             
             const data = await response.json();
             setMessages(data.sort((a: Message, b: Message) => 
-                new Date(b.send_at).getTime() - new Date(a.send_at).getTime()
+                new Date(a.send_at).getTime() - new Date(b.send_at).getTime()
             ));
             setIsLoading(false);
         } catch (error) {
@@ -119,7 +126,7 @@ export const Chat: React.FC<ChatProps> = observer(({ chatId }) => {
 
     return (
         <div className="flex flex-col h-[666px] bg-gray-50 rounded-lg">
-            <div className="flex-1 p-4 overflow-y-auto flex flex-col-reverse">
+            <div className="flex-1 p-4 overflow-y-auto">
                 {messages.length === 0 ? (
                     <div className="text-center text-gray-500 mt-4">
                         Нет сообщений. Начните общение!
@@ -127,20 +134,17 @@ export const Chat: React.FC<ChatProps> = observer(({ chatId }) => {
                 ) : (
                     messages.map((message) => {
                         const { content } = parseMessageContent(message.message);
+                        const isCurrentUser = message.sender_id === authStore.user?.id;
                         return (
                             <div
                                 key={message.id || message.send_at}
                                 className={`mb-4 ${
-                                    message.sender_id === authStore.user?.id
-                                        ? 'text-right'
-                                        : 'text-left'
+                                    isCurrentUser ? 'text-right' : 'text-left'
                                 }`}
                             >
                                 <div
                                     className={`inline-block p-3 rounded-lg ${
-                                        message.sender_id === authStore.user?.id
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-gray-200 text-gray-800'
+                                        isCurrentUser ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'
                                     }`}
                                 >
                                     {content}
