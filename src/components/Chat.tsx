@@ -118,7 +118,7 @@ export const Chat: React.FC<ChatProps> = observer(({ chatId }) => {
     }
 
     return (
-        <div className="flex flex-col h-96 bg-gray-50 rounded-lg">
+        <div className="flex flex-col h-[666px] bg-gray-50 rounded-lg">
             <div className="flex-1 p-4 overflow-y-auto flex flex-col-reverse">
                 {messages.length === 0 ? (
                     <div className="text-center text-gray-500 mt-4">
