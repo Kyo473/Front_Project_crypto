@@ -13,6 +13,7 @@ import P2PTrades from './pages/P2PTrades';
 import TradeDetails from './pages/TradeDetails';
 import ApiDocs from './pages/ApiDocs';
 import { AuthProvider } from './contexts/AuthContext';
+import NotFound from './pages/NotFound';
 
 const App: React.FC = observer(() => {
     return (
@@ -32,6 +33,7 @@ const App: React.FC = observer(() => {
                         <Route path="/p2p-trades" element={<P2PTrades />} />
                         <Route path="/p2p-trades/:id" element={<TradeDetails />} />
                         <Route path="/api-docs" element={<ApiDocs />} />
+                        <Route path="*" element={<NotFound />} />
                     </Routes>
                 </div>
             </AuthProvider>

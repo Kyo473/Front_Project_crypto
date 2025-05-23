@@ -8,7 +8,7 @@ const About: React.FC = () => {
                     <div className="text-center mb-16">
                         <h1 className="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
                             О проекте
-                        </h1>
+                    </h1>
                         <p className="text-gray-400 text-lg">
                             Инновационная платформа для работы с криптовалютами
                         </p>
@@ -39,7 +39,7 @@ const About: React.FC = () => {
                                     </svg>
                                 </div>
                                 <h2 className="text-2xl font-semibold">Что мы предлагаем</h2>
-                            </div>
+                        </div>
                             <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300">
                                 <li className="flex items-center space-x-3">
                                     <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,7 +76,7 @@ const About: React.FC = () => {
                                     </svg>
                                 </div>
                                 <h2 className="text-2xl font-semibold">Безопасность</h2>
-                            </div>
+                                    </div>
                             <p className="text-gray-300 leading-relaxed">
                                 Безопасность наших пользователей - наш главный приоритет. Мы используем 
                                 современные методы шифрования и защиты данных, чтобы обеспечить максимальную 
@@ -92,7 +92,7 @@ const About: React.FC = () => {
                                     </svg>
                                 </div>
                                 <h2 className="text-2xl font-semibold">Свяжитесь с нами</h2>
-                            </div>
+                                    </div>
                             <p className="text-gray-300 leading-relaxed">
                                 Если у вас есть вопросы или предложения, мы всегда готовы помочь. 
                                 Свяжитесь с нами через форму обратной связи или по электронной почте.
