@@ -12,7 +12,7 @@ const GuestLanding: React.FC = () => {
             <CryptoTable />
             <FAQ />
             <footer className="bg-slate-800 text-white text-center py-8 mt-8">
-                <p>© 2025 TimeInside. Все права защищены.</p>
+                <p>© 2025 FastexChange. Все права защищены.</p>
                 <p className="text-sm text-gray-400 mt-2">Сделано для крипто-свободы</p>
             </footer>
         </div>

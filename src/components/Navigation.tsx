@@ -37,7 +37,7 @@ const Navigation: React.FC = observer(() => {
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center h-16">
                     <Link to="/" className="text-white font-bold text-xl">
-                        CryptoApp
+                        FastexChange
                     </Link>
                     
                     {!isAuthenticated && (
@@ -73,7 +73,7 @@ const Navigation: React.FC = observer(() => {
                                     Маркет
                                 </Link>
                                 <Link
-                                    to="/p2p"
+                                    to="/p2p-trades"
                                     className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                                 >
                                     P2P сделки

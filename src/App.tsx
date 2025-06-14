@@ -29,7 +29,6 @@ const App: React.FC = observer(() => {
                         <Route path="/market" element={<Market />} />
                         <Route path="/about" element={<About />} />
                         <Route path="/crypto/:id" element={<CryptoDetails />} />
-                        <Route path="/p2p" element={<P2PTrades />} />
                         <Route path="/p2p-trades" element={<P2PTrades />} />
                         <Route path="/p2p-trades/:id" element={<TradeDetails />} />
                         <Route path="/api-docs" element={<ApiDocs />} />
